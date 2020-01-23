@@ -33,11 +33,13 @@ HANDLE CreateFileA(LPCSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode,
 	file->path = name;
 	if (dwCreationDisposition == DVL_OPEN_EXISTING) {
 		// read contents of existing file into buffer
-		std::ifstream filestream(file->path, std::ios::binary);
-		if (!filestream.fail()) {
-			file->buf.insert(file->buf.begin(),
-			    std::istreambuf_iterator<char>(filestream),
-			    std::istreambuf_iterator<char>());
+		std::ifstream filestream(file->path, std::ios::in | std::ios::binary);
+		if (filestream) {
+			filestream.seekg(0, std::ios::end);
+			file->buf.resize(filestream.tellg());
+			filestream.seekg(0, std::ios::beg);
+			filestream.read(&file->buf[0], file->buf.size());
+			filestream.close();
 		}
 	} else if (dwCreationDisposition == DVL_CREATE_ALWAYS) {
 		// start with empty file
@@ -93,7 +95,6 @@ DWORD SetFilePointer(HANDLE hFile, LONG lDistanceToMove, PLONG lpDistanceToMoveH
 		file->pos += lDistanceToMove;
 	} else {
 		UNIMPLEMENTED();
-
 	}
 	if (file->buf.size() < file->pos + 1)
 		file->buf.resize(file->pos + 1);
