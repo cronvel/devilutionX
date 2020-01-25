@@ -3107,6 +3107,9 @@ void MI_Flash2(int i)
 void MI_Manashield(int i)
 {
 	int id, diff;
+	//++CR
+	int convert, convertMax, hpAdjustement, manaAdjustement , damageTaken ;
+	//--CR
 
 	id = missile[i]._misource;
 	missile[i]._mix = plr[id].WorldX;
@@ -3135,12 +3138,74 @@ void MI_Manashield(int i)
 			missile[i]._mirange = 0;
 		if (plr[id]._pHitPoints < missile[i]._miVar1) {
 			diff = missile[i]._miVar1 - plr[id]._pHitPoints;
+			
+			//++CR
+			/*
+				Mana shield changes:
+					- Redirect 30% + Spell Level * 10% to mana (instead of 100%), but also cap it to ( 2 * Spell Level + MaxMana / 20 )
+					- Do not reduce damages by 1/3, instead reduce it by Spell Level (so works best against low damage than high)
+			*/
+			// For some reason, all HP and Mana related values are shifted by 6 bits
+			damageTaken = diff ;
+			hpAdjustement = 0 ;
+			manaAdjustement = 0 ;
+			
+			if ( damageTaken < 0 ) {
+				damageTaken = 0 ;
+			}
+			else if ( damageTaken <= missile[i]._mispllvl << 6 ) {
+				// All damages were deflected
+				hpAdjustement += damageTaken ;
+				damageTaken = 0 ;
+			}
+			else {
+				// First, immediately apply damage reduction based on spell level
+				hpAdjustement += missile[i]._mispllvl << 6 ;
+				damageTaken -= missile[i]._mispllvl << 6 ;
+
+				// Convert relative to the damage (Lvl1: 30% Max, Lvl8: 100%)
+				if ( missile[i]._mispllvl >= 8 ) { convert = damageTaken ; }
+				else { convert = damageTaken * ( 2 + missile[i]._mispllvl ) / 10 ; }
+
+				// Convert max by absolute limit (e.g. Lvl1/200MaxMana = 12 HP max converted)
+				convertMax = 2 * ( missile[i]._mispllvl << 6 ) + plr[id]._pMaxMana / 20 ;
+				if ( convert > convertMax ) { convert = convertMax ; }
+				
+				// Obviously can't convert more than remaining mana
+				if ( convert > plr[id]._pMana ) { convert = plr[id]._pMana ; }
+				
+				hpAdjustement += convert ;
+				manaAdjustement -= convert ;
+			}
+			
+			printf( "diff: %i   damageTaken: %i   miVar1: %i   miVar2: %i   pHitPoints: %i   pHPBase: %i   pMaxMana: %i   mispllvl: %i\n" , diff , damageTaken , missile[i]._miVar1 , missile[i]._miVar2 , plr[id]._pHitPoints , plr[id]._pHPBase , plr[id]._pMaxMana , missile[i]._mispllvl ) ;
+			printf( "Adjust %i | %i\n" , hpAdjustement , manaAdjustement ) ;
+			
+			drawmanaflag = TRUE;
+			drawhpflag = TRUE;
+
+			plr[id]._pHitPoints += hpAdjustement ; missile[i]._miVar1 += hpAdjustement ;
+			plr[id]._pHPBase += hpAdjustement ; missile[i]._miVar2 += hpAdjustement ;
+			plr[id]._pMana += manaAdjustement ;
+			plr[id]._pManaBase += manaAdjustement ;
+			
+			if ( plr[id]._pMana >> 6 <= 0 ) {
+				missile[i]._mirange = 0;
+				missile[i]._miDelFlag = TRUE;
+				if (plr[id]._pHitPoints < 0)
+					SetPlayerHitPoints(id, 0);
+				if (!(plr[id]._pHitPoints >> 6) && id == myplr) {
+					SyncPlrKill(id, missile[i]._miVar8);
+				}
+			}
+			/*
 			if (missile[i]._mispllvl > 0) {
 				diff += diff / -3;
 			}
 
 			if (diff < 0)
 				diff = 0;
+
 			drawmanaflag = TRUE;
 			drawhpflag = TRUE;
 
@@ -3162,6 +3227,8 @@ void MI_Manashield(int i)
 					SyncPlrKill(id, missile[i]._miVar8);
 				}
 			}
+			*/
+			//--CR
 		}
 
 		if (id == myplr && !plr[id]._pHitPoints && !missile[i]._miVar1 && plr[id]._pmode != PM_DEATH) {
