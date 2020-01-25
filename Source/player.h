@@ -18,6 +18,10 @@ extern int plr_sframe_size;
 extern int deathdelay;
 extern int plr_dframe_size;
 
+//++CR
+extern WORD gameDays;
+//--CR
+
 void SetPlayerGPtrs(BYTE *pData, BYTE **pAnim);
 void LoadPlrGFX(int pnum, player_graphic gfxflag);
 void InitPlayerGFX(int pnum);

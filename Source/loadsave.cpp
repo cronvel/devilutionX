@@ -159,6 +159,12 @@ void LoadGame(BOOL firstflag)
 
 	automapflag = OLoad();
 	AutoMapScale = WLoad();
+	
+	//++CR
+	// Load CR extensions
+	LoadCRExtensions();
+	//--CR
+	
 	mem_free_dbg(LoadBuff);
 	AutomapZoomReset();
 	ResyncQuests();
@@ -242,6 +248,14 @@ void CopyInt64(const void *src, void *dst)
 {
 	CopyBytes(src, 8, dst);
 }
+
+//++CR
+void LoadCRExtensions()
+{
+	CopyShort(tbuff, &gameDays);
+	if ( gameDays <= 0 ) { gameDays = 1; }
+}
+//--CR
 
 void LoadPlayer(int i)
 {
@@ -930,6 +944,12 @@ void SaveGame()
 
 	OSave(automapflag);
 	WSave(AutoMapScale);
+
+	//++CR
+	// Save CR extensions
+	SaveCRExtensions();
+	//--CR
+
 	pfile_get_game_name(szName);
 	dwLen = codec_get_encoded_len(tbuff - SaveBuff);
 	pfile_write_save_file(szName, SaveBuff, tbuff - SaveBuff, dwLen);
@@ -967,6 +987,15 @@ void OSave(BOOL v)
 	else
 		*tbuff++ = FALSE;
 }
+
+//++CR
+void SaveCRExtensions()
+{
+	// See CR_EXTENSION_EXTRA_FILEBUFF in ../defs.h for the file size adjustement
+	if ( gameDays <= 0 ) { gameDays = 1; }
+	CopyShort(&gameDays, tbuff);
+}
+//--CR
 
 void SavePlayer(int i)
 {

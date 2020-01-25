@@ -1142,9 +1142,11 @@ void S_StartHealer()
 	stextscrl = FALSE;
 	AddSText(0, 1, 1, "Welcome to the", COL_GOLD, 0);
 	AddSText(0, 3, 1, "Healer's home", COL_GOLD, 0);
-	AddSText(0, 9, 1, "Would you like to:", COL_GOLD, 0);
-	AddSText(0, 12, 1, "Talk to Pepin", COL_BLUE, 1);
 	//++CR
+	//AddSText(0, 9, 1, "Would you like to:", COL_GOLD, 0);
+	AddSText(0, 8, 1, "Would you like to:", COL_GOLD, 0);
+	//AddSText(0, 12, 1, "Talk to Pepin", COL_BLUE, 1);
+	AddSText(0, 11, 1, "Talk to Pepin", COL_BLUE, 1);
 	//AddSText(0, 14, 1, "Receive healing", COL_WHITE, 1);
 	AddSText(0, 13, 1, "Pepin heals for 150 gold", COL_GOLD, 0);
 	AddSText(0, 14, 1, "Receive healing and rest", COL_WHITE, 1);
@@ -1392,6 +1394,7 @@ void S_StartTavern()
 void S_StartTMorning()
 {
 	int hpRate, manaRate;
+	char dayStr[16];
 	
 	PaletteFadeIn(8);
 	PlaySFX(IS_CAST8);
@@ -1405,9 +1408,13 @@ void S_StartTMorning()
 	plr[myplr]._pMana += ( plr[myplr]._pMaxMana - plr[myplr]._pMana ) * manaRate / 100;
 	plr[myplr]._pManaBase += ( plr[myplr]._pMaxManaBase - plr[myplr]._pManaBase ) * manaRate / 100;
 	
+	gameDays ++ ;
+	snprintf( dayStr , 15 , "- Day %i -" , gameDays);
+
 	stextsize = 0;
 	stextscrl = FALSE;
 	AddSText(0, 2, 1, "Good Morning!", COL_GOLD, 0);
+	AddSText(0, 7, 1, dayStr, COL_GOLD, 0);
 	AddSText(0, 10, 1, "You wake up and", COL_GOLD, 0);
 	AddSText(0, 11, 1, "ready your stuffs...", COL_GOLD, 0);
 	AddSText(0, 12, 1, "You feel restored...", COL_GOLD, 0);
@@ -1419,6 +1426,8 @@ void S_StartTMorning()
 // After a night at the healer house...
 void S_StartHMorning()
 {
+	char dayStr[16];
+
 	PaletteFadeIn(8);
 	PlaySFX(IS_CAST8);
 	drawhpflag = TRUE;
@@ -1429,9 +1438,13 @@ void S_StartHMorning()
 	plr[myplr]._pMana = plr[myplr]._pMaxMana;
 	plr[myplr]._pManaBase = plr[myplr]._pMaxManaBase;
 	
+	gameDays ++ ;
+	snprintf( dayStr , 15 , "- Day %i -" , gameDays);
+
 	stextsize = 0;
 	stextscrl = FALSE;
 	AddSText(0, 2, 1, "Good Morning!", COL_GOLD, 0);
+	AddSText(0, 7, 1, dayStr, COL_GOLD, 0);
 	AddSText(0, 10, 1, "You wake up and", COL_GOLD, 0);
 	AddSText(0, 11, 1, "ready your stuffs...", COL_GOLD, 0);
 	AddSText(0, 12, 1, "You feel perfectly restored...", COL_GOLD, 0);
@@ -1444,6 +1457,7 @@ void S_StartHMorning()
 void S_StartGMorning()
 {
 	int hpRate, manaRate;
+	char dayStr[16];
 	
 	// Should add some sort of condition to allow that...
 	// Gillian wouldn't allow a stranger in his house.
@@ -1471,9 +1485,13 @@ void S_StartGMorning()
 		plr[myplr]._pMana += ( plr[myplr]._pMaxMana - plr[myplr]._pMana ) * manaRate / 100;
 		plr[myplr]._pManaBase += ( plr[myplr]._pMaxManaBase - plr[myplr]._pManaBase ) * manaRate / 100;
 		
+		gameDays ++ ;
+		snprintf( dayStr , 15 , "- Day %i -" , gameDays);
+
 		stextsize = 0;
 		stextscrl = FALSE;
 		AddSText(0, 2, 1, "Good Morning!", COL_GOLD, 0);
+		AddSText(0, 7, 1, dayStr, COL_GOLD, 0);
 		AddSText(0, 10, 1, "Gillian awake you with", COL_GOLD, 0);
 		AddSText(0, 11, 1, "a kiss on the cheek.", COL_GOLD, 0);
 		AddSText(0, 12, 1, "What a sweet morning!", COL_GOLD, 0);
@@ -1489,16 +1507,21 @@ void S_StartGMorning()
 void S_StartFMorning()
 {
 	int hpRate, manaRate;
-
+	char dayStr[16];
+	
 	PaletteFadeIn(8);
-	PlaySFX(IS_CAST8);
 	drawhpflag = TRUE;
 	
 	stextsize = 0;
 	stextscrl = FALSE;
 	
+	gameDays ++ ;
+	snprintf( dayStr , 15 , "- Day %i -" , gameDays);
+
 	if ( random_(33, 100) < 30 ) {
 		// Drunk
+		PlaySFX(IS_IMUSH);	// "Beuarg" (mushroom sound)
+		
 		hpRate = 50 + random_( 67 , 30 ) ;
 		manaRate = 40 + random_( 67 , 40 ) ;
 
@@ -1506,18 +1529,21 @@ void S_StartFMorning()
 		plr[myplr]._pHPBase = ( plr[myplr]._pMaxHPBase + plr[myplr]._pHPBase ) * hpRate / 200;
 		plr[myplr]._pMana = ( plr[myplr]._pMaxMana + plr[myplr]._pMana ) * manaRate / 200;
 		plr[myplr]._pManaBase = ( plr[myplr]._pMaxManaBase + plr[myplr]._pManaBase ) * manaRate / 200;
-
+		
 		AddSText(0, 2, 1, "The next morning...", COL_GOLD, 0);
-		AddSText(0, 7, 1, "Farnham made you drink", COL_GOLD, 0);
-		AddSText(0, 8, 1, "all the night...", COL_GOLD, 0);
-		AddSText(0, 10, 1, "You wake up with", COL_GOLD, 0);
-		AddSText(0, 11, 1, "a headach.", COL_GOLD, 0);
-		AddSText(0, 12, 1, "Farnham is still sleeping.", COL_GOLD, 0);
-		AddSText(0, 13, 1, "You are feeling a bit sick...", COL_GOLD, 0);
+		AddSText(0, 7, 1, dayStr, COL_GOLD, 0);
+		AddSText(0, 9, 1, "Farnham made you drink", COL_GOLD, 0);
+		AddSText(0, 10, 1, "all the night...", COL_GOLD, 0);
+		AddSText(0, 12, 1, "You wake up with", COL_GOLD, 0);
+		AddSText(0, 13, 1, "a headach.", COL_GOLD, 0);
+		AddSText(0, 14, 1, "Farnham is still sleeping.", COL_GOLD, 0);
+		AddSText(0, 15, 1, "You are feeling a bit sick...", COL_GOLD, 0);
 		AddSText(0, 18, 1, "Leave Farnham house", COL_WHITE, 1);
 		AddSLine(5);
 	}
 	else {
+		PlaySFX(TSFX_DRUNK15);	// "ZZZZZzzzzzZZZZzzz"
+		
 		hpRate = 35 + random_( 67 , 25 ) ;
 		manaRate = 35 + random_( 67 , 25 ) ;
 
@@ -1527,6 +1553,7 @@ void S_StartFMorning()
 		plr[myplr]._pManaBase += ( plr[myplr]._pMaxManaBase - plr[myplr]._pManaBase ) * manaRate / 100;
 
 		AddSText(0, 2, 1, "The next morning...", COL_GOLD, 0);
+		AddSText(0, 7, 1, dayStr, COL_GOLD, 0);
 		AddSText(0, 9, 1, "You wake up in the middle", COL_GOLD, 0);
 		AddSText(0, 10, 1, "of garbages.", COL_GOLD, 0);
 		AddSText(0, 11, 1, "Farnham is still sleeping.", COL_GOLD, 0);
@@ -2631,8 +2658,10 @@ void S_ConfirmEnter()
 
 void S_HealerEnter()
 {
+	//++CR
 	switch (stextsel) {
-	case 12:
+	//case 12:
+	case 11:
 		stextlhold = 12;
 		talker = 1;
 		stextshold = STORE_HEALER;
@@ -2641,7 +2670,6 @@ void S_HealerEnter()
 		StartStore(STORE_GOSSIP);
 		break;
 	case 14:
-		//++CR
 		/*
 		if (plr[myplr]._pHitPoints != plr[myplr]._pMaxHP)
 			PlaySFX(IS_CAST8);
@@ -2659,7 +2687,6 @@ void S_HealerEnter()
 			TakePlrsMoney(150);
 			StartStore(STORE_HMORNING);
 		}
-		//--CR
 		break;
 	case 16:
 		StartStore(STORE_HBUY);
@@ -2668,6 +2695,7 @@ void S_HealerEnter()
 		stextflag = STORE_NONE;
 		break;
 	}
+	//--CR
 }
 
 void S_HBuyEnter()

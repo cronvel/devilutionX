@@ -551,4 +551,11 @@ void InitLevels()
 	}
 }
 
+//++CR
+void InitCRExtensions()
+{
+	gameDays = 1;
+}
+//--CR
+
 DEVILUTION_END_NAMESPACE

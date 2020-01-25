@@ -41,4 +41,9 @@ void SavePortal(int i);
 void SaveLevel();
 void LoadLevel();
 
+//++CR
+void LoadCRExtensions();
+void SaveCRExtensions();
+//--CR
+
 #endif /* __LOADSAVE_H__ */

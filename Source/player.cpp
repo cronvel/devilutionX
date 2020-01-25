@@ -18,6 +18,11 @@ int plr_sframe_size;
 int deathdelay;
 int plr_dframe_size;
 
+//++CR
+// This is probably not the right place to declare that, but I can't find a proper place ATM
+WORD gameDays;
+//--CR
+
 const char ArmourChar[4] = { 'L', 'M', 'H', 0 };
 const char WepChar[10] = { 'N', 'U', 'S', 'D', 'B', 'A', 'M', 'H', 'T', 0 };
 const char CharChar[] = {

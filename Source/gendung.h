@@ -76,4 +76,9 @@ void DRLG_HoldThemeRooms();
 BOOL SkipThemeRoom(int x, int y);
 void InitLevels();
 
+//++CR
+// Init CR extensions
+void InitCRExtensions();
+//--CR
+
 #endif /* __GENDUNG_H__ */

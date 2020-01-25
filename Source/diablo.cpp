@@ -105,6 +105,9 @@ BOOL StartGame(BOOL bNewGame, BOOL bSinglePlayer)
 			InitQuests();
 			InitPortals();
 			InitDungMsgs(myplr);
+			//++CR
+			InitCRExtensions();
+			//--CR
 		}
 		if (!gbValidSaveFile || !gbLoadGame)
 			uMsg = WM_DIABNEWGAME;
@@ -1037,6 +1040,10 @@ void diablo_pause_game()
 /* NOTE: `return` must be used instead of `break` to be bin exact as C++ */
 void PressChar(int vkey)
 {
+	//++CR
+	char tmpStr[80];
+	//--CR
+	
 	if (gmenu_exception() || control_talk_last_key(vkey) || sgnTimeoutCurs != 0 || deathflag) {
 		return;
 	}
@@ -1144,7 +1151,11 @@ void PressChar(int vkey)
 		}
 		return;
 	case 'v':
-		NetSendCmdString(1 << myplr, gszProductName);
+		//++CR
+		//NetSendCmdString(1 << myplr, gszProductName);
+		snprintf( tmpStr , 79 , "day %i - %s" , gameDays , gszProductName);
+		NetSendCmdString(1 << myplr, tmpStr);
+		//--CR
 		return;
 	case 'V':
 		NetSendCmdString(1 << myplr, gszVersionNumber);
