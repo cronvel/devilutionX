@@ -1391,13 +1391,19 @@ void S_StartTavern()
 // After a night at the tavern...
 void S_StartTMorning()
 {
+	int hpRate, manaRate;
+	
 	PaletteFadeIn(8);
 	PlaySFX(IS_CAST8);
 	drawhpflag = TRUE;
-	plr[myplr]._pHitPoints += ( plr[myplr]._pMaxHP - plr[myplr]._pHitPoints ) * 7 / 10;
-	plr[myplr]._pHPBase += ( plr[myplr]._pMaxHPBase - plr[myplr]._pHPBase ) * 7 / 10;
-	plr[myplr]._pMana += ( plr[myplr]._pMaxMana - plr[myplr]._pMana ) * 9 / 10;
-	plr[myplr]._pManaBase += ( plr[myplr]._pMaxManaBase - plr[myplr]._pManaBase ) * 9 / 10;
+	
+	hpRate = 60 + random_( 67 , 20 ) ;
+	manaRate = 80 + random_( 67 , 20 ) ;
+
+	plr[myplr]._pHitPoints += ( plr[myplr]._pMaxHP - plr[myplr]._pHitPoints ) * hpRate / 100;
+	plr[myplr]._pHPBase += ( plr[myplr]._pMaxHPBase - plr[myplr]._pHPBase ) * hpRate / 100;
+	plr[myplr]._pMana += ( plr[myplr]._pMaxMana - plr[myplr]._pMana ) * manaRate / 100;
+	plr[myplr]._pManaBase += ( plr[myplr]._pMaxManaBase - plr[myplr]._pManaBase ) * manaRate / 100;
 	
 	stextsize = 0;
 	stextscrl = FALSE;
@@ -1417,7 +1423,7 @@ void S_StartHMorning()
 	PlaySFX(IS_CAST8);
 	drawhpflag = TRUE;
 
-	// Full restoration
+	// Always full restoration
 	plr[myplr]._pHitPoints = plr[myplr]._pMaxHP;
 	plr[myplr]._pHPBase = plr[myplr]._pMaxHPBase;
 	plr[myplr]._pMana = plr[myplr]._pMaxMana;
@@ -1437,29 +1443,53 @@ void S_StartHMorning()
 // After a night at Gillian house...
 void S_StartGMorning()
 {
-	PaletteFadeIn(8);
-	PlaySFX(IS_CAST8);
-	drawhpflag = TRUE;
-	plr[myplr]._pHitPoints += ( plr[myplr]._pMaxHP - plr[myplr]._pHitPoints ) * 7 / 10;
-	plr[myplr]._pHPBase += ( plr[myplr]._pMaxHPBase - plr[myplr]._pHPBase ) * 7 / 10;
-	plr[myplr]._pMana = plr[myplr]._pMaxMana;
-	plr[myplr]._pManaBase = plr[myplr]._pMaxManaBase;
+	int hpRate, manaRate;
 	
-	stextsize = 0;
-	stextscrl = FALSE;
-	AddSText(0, 2, 1, "Good Morning!", COL_GOLD, 0);
-	AddSText(0, 10, 1, "Gillian awake you with", COL_GOLD, 0);
-	AddSText(0, 11, 1, "a kiss on the cheek.", COL_GOLD, 0);
-	AddSText(0, 12, 1, "What a sweet morning!", COL_GOLD, 0);
-	AddSText(0, 13, 1, "You feel restored...", COL_GOLD, 0);
-	AddSText(0, 18, 1, "Leave Gillian house", COL_WHITE, 1);
-	AddSLine(5);
+	// Should add some sort of condition to allow that...
+	// Gillian wouldn't allow a stranger in his house.
+	
+	if ( true ) {
+		stextsize = 0;
+		stextscrl = FALSE;
+		AddSText(0, 2, 1, "Gillian", COL_GOLD, 0);
+		AddSText(0, 9, 1, "Gillian says:", COL_GOLD, 0);
+		AddSText(0, 11, 1, "Sorry, but we cannot", COL_GOLD, 0);
+		AddSText(0, 12, 1, "host strangers.", COL_GOLD, 0);
+		AddSText(0, 18, 1, "Leave Gillian house", COL_WHITE, 1);
+		AddSLine(5);
+	}
+	else {
+		PaletteFadeIn(8);
+		PlaySFX(IS_CAST8);
+		drawhpflag = TRUE;
+
+		hpRate = 60 + random_( 67 , 20 ) ;
+		manaRate = 90 + random_( 67 , 10 ) ;
+
+		plr[myplr]._pHitPoints += ( plr[myplr]._pMaxHP - plr[myplr]._pHitPoints ) * hpRate / 100;
+		plr[myplr]._pHPBase += ( plr[myplr]._pMaxHPBase - plr[myplr]._pHPBase ) * hpRate / 100;
+		plr[myplr]._pMana += ( plr[myplr]._pMaxMana - plr[myplr]._pMana ) * manaRate / 100;
+		plr[myplr]._pManaBase += ( plr[myplr]._pMaxManaBase - plr[myplr]._pManaBase ) * manaRate / 100;
+		
+		stextsize = 0;
+		stextscrl = FALSE;
+		AddSText(0, 2, 1, "Good Morning!", COL_GOLD, 0);
+		AddSText(0, 10, 1, "Gillian awake you with", COL_GOLD, 0);
+		AddSText(0, 11, 1, "a kiss on the cheek.", COL_GOLD, 0);
+		AddSText(0, 12, 1, "What a sweet morning!", COL_GOLD, 0);
+		AddSText(0, 13, 1, "You feel restored...", COL_GOLD, 0);
+		AddSText(0, 18, 1, "Leave Gillian house", COL_WHITE, 1);
+		AddSLine(5);
+	}
+	
 	storenumh = 20;
 }
 
 // After a night at Farnham house...
 void S_StartFMorning()
 {
+	int hpRate, manaRate;
+
 	PaletteFadeIn(8);
 	PlaySFX(IS_CAST8);
 	drawhpflag = TRUE;
@@ -1467,12 +1497,15 @@ void S_StartFMorning()
 	stextsize = 0;
 	stextscrl = FALSE;
 	
-	if ( random_(3, 10) < 3 ) {
+	if ( random_(33, 100) < 30 ) {
 		// Drunk
-		plr[myplr]._pHitPoints = ( plr[myplr]._pMaxHP + plr[myplr]._pHitPoints ) / 5;
-		plr[myplr]._pHPBase = ( plr[myplr]._pMaxHPBase + plr[myplr]._pHPBase ) / 5;
-		plr[myplr]._pMana = ( plr[myplr]._pMaxMana + plr[myplr]._pMana ) / 6;
-		plr[myplr]._pManaBase = ( plr[myplr]._pMaxManaBase + plr[myplr]._pManaBase ) / 6;
+		hpRate = 50 + random_( 67 , 30 ) ;
+		manaRate = 40 + random_( 67 , 40 ) ;
+
+		plr[myplr]._pHitPoints = ( plr[myplr]._pMaxHP + plr[myplr]._pHitPoints ) * hpRate / 200;
+		plr[myplr]._pHPBase = ( plr[myplr]._pMaxHPBase + plr[myplr]._pHPBase ) * hpRate / 200;
+		plr[myplr]._pMana = ( plr[myplr]._pMaxMana + plr[myplr]._pMana ) * manaRate / 200;
+		plr[myplr]._pManaBase = ( plr[myplr]._pMaxManaBase + plr[myplr]._pManaBase ) * manaRate / 200;
 
 		AddSText(0, 2, 1, "The next morning...", COL_GOLD, 0);
 		AddSText(0, 7, 1, "Farnham made you drink", COL_GOLD, 0);
@@ -1485,10 +1518,13 @@ void S_StartFMorning()
 		AddSLine(5);
 	}
 	else {
-		plr[myplr]._pHitPoints += ( plr[myplr]._pMaxHP - plr[myplr]._pHitPoints ) * 5 / 10;
-		plr[myplr]._pHPBase += ( plr[myplr]._pMaxHPBase - plr[myplr]._pHPBase ) * 5 / 10;
-		plr[myplr]._pMana += ( plr[myplr]._pMaxMana - plr[myplr]._pMana ) * 5 / 10;
-		plr[myplr]._pManaBase += ( plr[myplr]._pMaxManaBase - plr[myplr]._pManaBase ) * 5 / 10;
+		hpRate = 35 + random_( 67 , 25 ) ;
+		manaRate = 35 + random_( 67 , 25 ) ;
+
+		plr[myplr]._pHitPoints += ( plr[myplr]._pMaxHP - plr[myplr]._pHitPoints ) * hpRate / 100;
+		plr[myplr]._pHPBase += ( plr[myplr]._pMaxHPBase - plr[myplr]._pHPBase ) * hpRate / 100;
+		plr[myplr]._pMana += ( plr[myplr]._pMaxMana - plr[myplr]._pMana ) * manaRate / 100;
+		plr[myplr]._pManaBase += ( plr[myplr]._pMaxManaBase - plr[myplr]._pManaBase ) * manaRate / 100;
 
 		AddSText(0, 2, 1, "The next morning...", COL_GOLD, 0);
 		AddSText(0, 9, 1, "You wake up in the middle", COL_GOLD, 0);
@@ -2811,8 +2847,6 @@ void S_BarmaidEnter()
 		break;
 	//++CR
 	case 14:
-		// Should add some sort of condition to allow that...
-		// Gillian wouldn't allow a stranger in his house.
 		StartStore(STORE_GMORNING);
 		break;
 	//--CR
