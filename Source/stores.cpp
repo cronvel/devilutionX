@@ -1144,7 +1144,11 @@ void S_StartHealer()
 	AddSText(0, 3, 1, "Healer's home", COL_GOLD, 0);
 	AddSText(0, 9, 1, "Would you like to:", COL_GOLD, 0);
 	AddSText(0, 12, 1, "Talk to Pepin", COL_BLUE, 1);
-	AddSText(0, 14, 1, "Receive healing", COL_WHITE, 1);
+	//++CR
+	//AddSText(0, 14, 1, "Receive healing", COL_WHITE, 1);
+	AddSText(0, 13, 1, "Pepin heals for 150 gold", COL_GOLD, 0);
+	AddSText(0, 14, 1, "Receive healing and rest", COL_WHITE, 1);
+	//--CR
 	AddSText(0, 16, 1, "Buy items", COL_WHITE, 1);
 	AddSText(0, 18, 1, "Leave Healer's home", COL_WHITE, 1);
 	AddSLine(5);
@@ -1374,10 +1378,131 @@ void S_StartTavern()
 	AddSText(0, 3, 1, "Rising Sun", COL_GOLD, 0);
 	AddSText(0, 9, 1, "Would you like to:", COL_GOLD, 0);
 	AddSText(0, 12, 1, "Talk to Ogden", COL_BLUE, 1);
+	//++CR
+	AddSText(0, 15, 1, "We have a bed for 80 gold", COL_GOLD, 0);
+	AddSText(0, 16, 1, "Have a night at the Inn", COL_WHITE, 1);
+	//--CR
 	AddSText(0, 18, 1, "Leave the tavern", COL_WHITE, 1);
 	AddSLine(5);
 	storenumh = 20;
 }
+
+//++CR
+// After a night at the tavern...
+void S_StartTMorning()
+{
+	PaletteFadeIn(8);
+	PlaySFX(IS_CAST8);
+	drawhpflag = TRUE;
+	plr[myplr]._pHitPoints += ( plr[myplr]._pMaxHP - plr[myplr]._pHitPoints ) * 7 / 10;
+	plr[myplr]._pHPBase += ( plr[myplr]._pMaxHPBase - plr[myplr]._pHPBase ) * 7 / 10;
+	plr[myplr]._pMana += ( plr[myplr]._pMaxMana - plr[myplr]._pMana ) * 9 / 10;
+	plr[myplr]._pManaBase += ( plr[myplr]._pMaxManaBase - plr[myplr]._pManaBase ) * 9 / 10;
+	
+	stextsize = 0;
+	stextscrl = FALSE;
+	AddSText(0, 2, 1, "Good Morning!", COL_GOLD, 0);
+	AddSText(0, 10, 1, "You wake up and", COL_GOLD, 0);
+	AddSText(0, 11, 1, "ready your stuffs...", COL_GOLD, 0);
+	AddSText(0, 12, 1, "You feel restored...", COL_GOLD, 0);
+	AddSText(0, 18, 1, "Leave the tavern", COL_WHITE, 1);
+	AddSLine(5);
+	storenumh = 20;
+}
+
+// After a night at the healer house...
+void S_StartHMorning()
+{
+	PaletteFadeIn(8);
+	PlaySFX(IS_CAST8);
+	drawhpflag = TRUE;
+
+	// Full restoration
+	plr[myplr]._pHitPoints = plr[myplr]._pMaxHP;
+	plr[myplr]._pHPBase = plr[myplr]._pMaxHPBase;
+	plr[myplr]._pMana = plr[myplr]._pMaxMana;
+	plr[myplr]._pManaBase = plr[myplr]._pMaxManaBase;
+	
+	stextsize = 0;
+	stextscrl = FALSE;
+	AddSText(0, 2, 1, "Good Morning!", COL_GOLD, 0);
+	AddSText(0, 10, 1, "You wake up and", COL_GOLD, 0);
+	AddSText(0, 11, 1, "ready your stuffs...", COL_GOLD, 0);
+	AddSText(0, 12, 1, "You feel perfectly restored...", COL_GOLD, 0);
+	AddSText(0, 18, 1, "Leave the healer house", COL_WHITE, 1);
+	AddSLine(5);
+	storenumh = 20;
+}
+
+// After a night at Gillian house...
+void S_StartGMorning()
+{
+	PaletteFadeIn(8);
+	PlaySFX(IS_CAST8);
+	drawhpflag = TRUE;
+	plr[myplr]._pHitPoints += ( plr[myplr]._pMaxHP - plr[myplr]._pHitPoints ) * 7 / 10;
+	plr[myplr]._pHPBase += ( plr[myplr]._pMaxHPBase - plr[myplr]._pHPBase ) * 7 / 10;
+	plr[myplr]._pMana = plr[myplr]._pMaxMana;
+	plr[myplr]._pManaBase = plr[myplr]._pMaxManaBase;
+	
+	stextsize = 0;
+	stextscrl = FALSE;
+	AddSText(0, 2, 1, "Good Morning!", COL_GOLD, 0);
+	AddSText(0, 10, 1, "Gillian awake you with", COL_GOLD, 0);
+	AddSText(0, 11, 1, "a kiss on the cheek.", COL_GOLD, 0);
+	AddSText(0, 12, 1, "What a sweet morning!", COL_GOLD, 0);
+	AddSText(0, 13, 1, "You feel restored...", COL_GOLD, 0);
+	AddSText(0, 18, 1, "Leave Gillian house", COL_WHITE, 1);
+	AddSLine(5);
+	storenumh = 20;
+}
+
+// After a night at Farnham house...
+void S_StartFMorning()
+{
+	PaletteFadeIn(8);
+	PlaySFX(IS_CAST8);
+	drawhpflag = TRUE;
+	
+	stextsize = 0;
+	stextscrl = FALSE;
+	
+	if ( random_(3, 10) < 3 ) {
+		// Drunk
+		plr[myplr]._pHitPoints = ( plr[myplr]._pMaxHP + plr[myplr]._pHitPoints ) / 5;
+		plr[myplr]._pHPBase = ( plr[myplr]._pMaxHPBase + plr[myplr]._pHPBase ) / 5;
+		plr[myplr]._pMana = ( plr[myplr]._pMaxMana + plr[myplr]._pMana ) / 6;
+		plr[myplr]._pManaBase = ( plr[myplr]._pMaxManaBase + plr[myplr]._pManaBase ) / 6;
+
+		AddSText(0, 2, 1, "The next morning...", COL_GOLD, 0);
+		AddSText(0, 7, 1, "Farnham made you drink", COL_GOLD, 0);
+		AddSText(0, 8, 1, "all the night...", COL_GOLD, 0);
+		AddSText(0, 10, 1, "You wake up with", COL_GOLD, 0);
+		AddSText(0, 11, 1, "a headach.", COL_GOLD, 0);
+		AddSText(0, 12, 1, "Farnham is still sleeping.", COL_GOLD, 0);
+		AddSText(0, 13, 1, "You are feeling a bit sick...", COL_GOLD, 0);
+		AddSText(0, 18, 1, "Leave Farnham house", COL_WHITE, 1);
+		AddSLine(5);
+	}
+	else {
+		plr[myplr]._pHitPoints += ( plr[myplr]._pMaxHP - plr[myplr]._pHitPoints ) * 5 / 10;
+		plr[myplr]._pHPBase += ( plr[myplr]._pMaxHPBase - plr[myplr]._pHPBase ) * 5 / 10;
+		plr[myplr]._pMana += ( plr[myplr]._pMaxMana - plr[myplr]._pMana ) * 5 / 10;
+		plr[myplr]._pManaBase += ( plr[myplr]._pMaxManaBase - plr[myplr]._pManaBase ) * 5 / 10;
+
+		AddSText(0, 2, 1, "The next morning...", COL_GOLD, 0);
+		AddSText(0, 9, 1, "You wake up in the middle", COL_GOLD, 0);
+		AddSText(0, 10, 1, "of garbages.", COL_GOLD, 0);
+		AddSText(0, 11, 1, "Farnham is still sleeping.", COL_GOLD, 0);
+		AddSText(0, 12, 1, "You don't feel", COL_GOLD, 0);
+		AddSText(0, 13, 1, "very much restored...", COL_GOLD, 0);
+		AddSText(0, 18, 1, "Leave Farnham house", COL_WHITE, 1);
+		AddSLine(5);
+	}
+	
+	storenumh = 20;
+}
+//--CR
 
 void S_StartBarMaid()
 {
@@ -1386,6 +1511,7 @@ void S_StartBarMaid()
 	AddSText(0, 2, 1, "Gillian", COL_GOLD, 0);
 	AddSText(0, 9, 1, "Would you like to:", COL_GOLD, 0);
 	AddSText(0, 12, 1, "Talk to Gillian", COL_BLUE, 1);
+	AddSText(0, 14, 1, "Ask a shelter for the night", COL_WHITE, 1);
 	AddSText(0, 18, 1, "Say goodbye", COL_WHITE, 1);
 	AddSLine(5);
 	storenumh = 20;
@@ -1398,6 +1524,7 @@ void S_StartDrunk()
 	AddSText(0, 2, 1, "Farnham the Drunk", COL_GOLD, 0);
 	AddSText(0, 9, 1, "Would you like to:", COL_GOLD, 0);
 	AddSText(0, 12, 1, "Talk to Farnham", COL_BLUE, 1);
+	AddSText(0, 14, 1, "Ask a shelter for the night", COL_WHITE, 1);
 	AddSText(0, 18, 1, "Say Goodbye", COL_WHITE, 1);
 	AddSLine(5);
 	storenumh = 20;
@@ -1490,6 +1617,20 @@ void StartStore(char s)
 		case STORE_BARMAID:
 			S_StartBarMaid();
 			break;
+		//++CR
+		case STORE_TMORNING:
+			S_StartTMorning();
+			break;
+		case STORE_HMORNING:
+			S_StartHMorning();
+			break;
+		case STORE_GMORNING:
+			S_StartGMorning();
+			break;
+		case STORE_FMORNING:
+			S_StartFMorning();
+			break;
+		//--CR
 		}
 
 		for (i = 0; i < 24; i++) {
@@ -1567,6 +1708,12 @@ void STextESC()
 		case STORE_TAVERN:
 		case STORE_DRUNK:
 		case STORE_BARMAID:
+		//++CR
+		case STORE_TMORNING:
+		case STORE_HMORNING:
+		case STORE_GMORNING:
+		case STORE_FMORNING:
+		//--CR
 			stextflag = STORE_NONE;
 			break;
 		case STORE_GOSSIP:
@@ -2458,11 +2605,25 @@ void S_HealerEnter()
 		StartStore(STORE_GOSSIP);
 		break;
 	case 14:
+		//++CR
+		/*
 		if (plr[myplr]._pHitPoints != plr[myplr]._pMaxHP)
 			PlaySFX(IS_CAST8);
 		drawhpflag = TRUE;
 		plr[myplr]._pHitPoints = plr[myplr]._pMaxHP;
 		plr[myplr]._pHPBase = plr[myplr]._pMaxHPBase;
+		*/
+		
+		if (plr[myplr]._pGold < 150) {
+			stextshold = STORE_HEALER;
+			stextlhold = 14;
+			stextvhold = stextsval;
+			StartStore(STORE_NOMONEY);
+		} else {
+			TakePlrsMoney(150);
+			StartStore(STORE_HMORNING);
+		}
+		//--CR
 		break;
 	case 16:
 		StartStore(STORE_HBUY);
@@ -2596,11 +2757,46 @@ void S_TavernEnter()
 		gossipend = QUEST_OGDEN10;
 		StartStore(STORE_GOSSIP);
 		break;
+	//++CR
+	case 16:
+		if (plr[myplr]._pGold < 80) {
+			stextshold = STORE_TAVERN;
+			stextlhold = 16;
+			stextvhold = stextsval;
+			StartStore(STORE_NOMONEY);
+		} else {
+			TakePlrsMoney(80);
+			StartStore(STORE_TMORNING);
+		}
+		break;
+	//--CR
 	case 18:
 		stextflag = STORE_NONE;
 		break;
 	}
 }
+
+//++CR
+void S_TMorningEnter()
+{
+	stextflag = STORE_NONE;
+}
+
+void S_HMorningEnter()
+{
+	stextflag = STORE_NONE;
+}
+
+void S_GMorningEnter()
+{
+	stextflag = STORE_NONE;
+}
+
+void S_FMorningEnter()
+{
+	stextflag = STORE_NONE;
+}
+//--CR
 
 void S_BarmaidEnter()
 {
@@ -2613,6 +2809,13 @@ void S_BarmaidEnter()
 		gossipend = QUEST_GILLIAN10;
 		StartStore(STORE_GOSSIP);
 		break;
+	//++CR
+	case 14:
+		// Should add some sort of condition to allow that...
+		// Gillian wouldn't allow a stranger in his house.
+		StartStore(STORE_GMORNING);
+		break;
+	//--CR
 	case 18:
 		stextflag = STORE_NONE;
 		break;
@@ -2630,6 +2833,12 @@ void S_DrunkEnter()
 		gossipend = QUEST_FARNHAM13;
 		StartStore(STORE_GOSSIP);
 		break;
+	//++CR
+	case 14:
+		// Farnham is always OK to have someone to talk with all the night.
+		StartStore(STORE_FMORNING);
+		break;
+	//--CR
 	case 18:
 		stextflag = STORE_NONE;
 		break;
@@ -2714,6 +2923,20 @@ void STextEnter()
 		case STORE_BARMAID:
 			S_BarmaidEnter();
 			break;
+		//++CR
+		case STORE_TMORNING:
+			S_TMorningEnter();
+			break;
+		case STORE_HMORNING:
+			S_HMorningEnter();
+			break;
+		case STORE_GMORNING:
+			S_GMorningEnter();
+			break;
+		case STORE_FMORNING:
+			S_FMorningEnter();
+			break;
+		//--CR
 		}
 	}
 }
