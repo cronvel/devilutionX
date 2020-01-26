@@ -1,0 +1,32 @@
+
+New Gameplay, with number of day needed to kill the final boss.
+
+Basic improvements:
+
+- Remove all potions, or change their use-case dramatically (e.g. provide better restoration when sleeping)
+- Remove Level Up full restoration (eventually keeping a bit of bonus)
+- Improve all spell efficiency (since mana have to be saved most of time)
+- Change Flash spell:
+	- beside the spell "normal" cost, it will always eat 1/4 to 1/3 of remaining mana
+	- damage are proportional to mana used, improved by spell-level
+	- the damage per mana used should be low, much lower than any other spell
+	- but the damage per spell should be the higher
+	- basically, we waste a lot of mana to deal the maximum damage in the minimum of time
+	- it should be used as an emergency spell, when we are closed to be killed
+	- it should also knock back every target
+	- it would be useful in conjunction with the new/less OP mana shield, since there should always be
+	  some damage dealt to HP
+- Improve Flame Wave: should be harder to block
+- Make scroll more useful: check the spell-level of scroll spell, maybe taking into consideration the player
+  actual spell-level if any
+- Rebalance staves with charges (too powerful in the new mechanics)
+
+
+
+Greater improvements:
+
+- Add some kind of necromantic spell: summoning squeleton ally (should be inspired by Golem):
+	- Possibility to have at most one squeleton per spell-level at the same time
+	- The squeleton spawn can be any of the cathedral squeleton, the higher the spell-level,
+	  the higher the chance to summon a higher level squeleton
+
