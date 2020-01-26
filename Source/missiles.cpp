@@ -3182,7 +3182,7 @@ void MI_Manashield(int i)
 			}
 			
 			printf( "diff: %i   damageTaken: %i   miVar1: %i   miVar2: %i   pHitPoints: %i   pHPBase: %i   pMaxMana: %i   mispllvl: %i\n" , diff , damageTaken , missile[i]._miVar1 , missile[i]._miVar2 , plr[id]._pHitPoints , plr[id]._pHPBase , plr[id]._pMaxMana , missile[i]._mispllvl ) ;
-			printf( "Adjust %i | %i\n" , hpAdjustement , manaAdjustement ) ;
+			printf( "Adjust %i(%i) | %i\n" , hpAdjustement , - ( diff - hpAdjustement ) , manaAdjustement ) ;
 			
 			drawmanaflag = TRUE;
 			drawhpflag = TRUE;
