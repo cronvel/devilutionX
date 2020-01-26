@@ -23,10 +23,31 @@ Basic improvements:
 
 
 
+Medium improvements:
+
+- Maybe: add a regen/bleeding/poison mechanism? 
+	- so the healing spell would have some usefulness
+	- the regen should be capped, or the whole “number of day to defeat the final boss” becomes useless
+	- maybe implement some kind of “ghost” max hp, each time damages are received, the ghost max hp drop
+	  and no healing can restore above that ghost value, only sleeping in town can raise that ghost value
+
+
+
 Greater improvements:
 
 - Add some kind of necromantic spell: summoning squeleton ally (should be inspired by Golem):
 	- Possibility to have at most one squeleton per spell-level at the same time
 	- The squeleton spawn can be any of the cathedral squeleton, the higher the spell-level,
 	  the higher the chance to summon a higher level squeleton
+- Add a movespeed mechanism:
+	- the rogue has +10% by default
+	- items like heavy armor (i.e. better armors than hard leather armors) have a movespeed penalty
+	- some magical items have bonus/curse on movespeed
+	- maybe add a run skill, that uses mana for a temporary +50% movespeed boost
+
+
+
+Exceptional improvements:
+
+- Tristram is attacked by Leoric and its squeleton army
 
