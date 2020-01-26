@@ -3167,9 +3167,8 @@ void MI_Manashield(int i)
 				hpAdjustement += missile[i]._mispllvl << 6 ;
 				damageTaken -= missile[i]._mispllvl << 6 ;
 
-				// Convert relative to the damage (Lvl1: 30% Max, Lvl8: 100%)
-				if ( missile[i]._mispllvl >= 8 ) { convert = damageTaken ; }
-				else { convert = damageTaken * ( 2 + missile[i]._mispllvl ) / 10 ; }
+				// Convert relative to the damage (Lvl1: 33% Max, Lvl3: 50%, Lvl5: 60%, Lvl10: 73%, Lvl15: 80%)
+				convert = damageTaken * ( 1 + missile[i]._mispllvl ) / ( 5 + missile[i]._mispllvl ) ;
 
 				// Convert max by absolute limit (e.g. Lvl1/200MaxMana = 12 HP max converted)
 				convertMax = 2 * ( missile[i]._mispllvl << 6 ) + plr[id]._pMaxMana / 20 ;
