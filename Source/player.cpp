@@ -43,6 +43,7 @@ char PlrGFXAnimLens[][11] = {
 	{ 8, 18, 8, 4, 20, 16, 7, 20, 8, 10, 12 },
 	{ 8, 16, 8, 6, 20, 12, 8, 20, 8, 12, 8 },
 };
+
 int PWVel[3][3] = {
 	{ 2048, 1024, 512 },
 	{ 2048, 1024, 512 },
@@ -52,6 +53,7 @@ int PWVel[3][3] = {
 int AnimLenFromClass[3] = {
 	8, 8, 8
 };
+
 int StrengthTbl[3] = { 30, 20, 15 };
 int MagicTbl[3] = { 10, 15, 35 };
 int DexterityTbl[3] = { 20, 30, 15 };
@@ -510,8 +512,10 @@ void ClearPlrRVars(PlayerStruct *p)
 {
 	// TODO: Missing debug assert p != NULL
 	p->bReserved[0] = 0;
-	p->bReserved[1] = 0;
-	p->bReserved[2] = 0;
+	//++CR
+	//p->bReserved[1] = 0;
+	//p->bReserved[2] = 0;
+	//--CR
 	p->wReserved[0] = 0;
 	p->wReserved[1] = 0;
 	p->wReserved[2] = 0;
@@ -2142,10 +2146,12 @@ BOOL PM_DoWalk(int pnum)
 		PlaySfxLoc(PS_WALK1, plr[pnum].WorldX, plr[pnum].WorldY);
 	}
 
-	anim_len = 8;
-	if (currlevel != 0) {
-		anim_len = AnimLenFromClass[plr[pnum]._pClass];
-	}
+	//++CR
+	//anim_len = 8;
+	//if (currlevel != 0) { anim_len = AnimLenFromClass[plr[pnum]._pClass]; }
+	anim_len = plr[pnum]._pMoveDuration;
+	if (currlevel == 0 && anim_len > 8) { anim_len = 8 ; }
+	//--CR
 
 	if (plr[pnum]._pVar8 == anim_len) {
 		dPlayer[plr[pnum].WorldX][plr[pnum].WorldY] = 0;
@@ -2195,10 +2201,12 @@ BOOL PM_DoWalk2(int pnum)
 		PlaySfxLoc(PS_WALK1, plr[pnum].WorldX, plr[pnum].WorldY);
 	}
 
-	anim_len = 8;
-	if (currlevel != 0) {
-		anim_len = AnimLenFromClass[plr[pnum]._pClass];
-	}
+	//++CR
+	//anim_len = 8;
+	//if (currlevel != 0) { anim_len = AnimLenFromClass[plr[pnum]._pClass]; }
+	anim_len = plr[pnum]._pMoveDuration;
+	if (currlevel == 0 && anim_len > 8) { anim_len = 8 ; }
+	//--CR
 
 	if (plr[pnum]._pVar8 == anim_len) {
 		dPlayer[plr[pnum]._pVar1][plr[pnum]._pVar2] = 0;
@@ -2245,10 +2253,12 @@ BOOL PM_DoWalk3(int pnum)
 		PlaySfxLoc(PS_WALK1, plr[pnum].WorldX, plr[pnum].WorldY);
 	}
 
-	anim_len = 8;
-	if (currlevel != 0) {
-		anim_len = AnimLenFromClass[plr[pnum]._pClass];
-	}
+	//++CR
+	//anim_len = 8;
+	//if (currlevel != 0) { anim_len = AnimLenFromClass[plr[pnum]._pClass]; }
+	anim_len = plr[pnum]._pMoveDuration;
+	if (currlevel == 0 && anim_len > 8) { anim_len = 8 ; }
+	//--CR
 
 	if (plr[pnum]._pVar8 == anim_len) {
 		dPlayer[plr[pnum].WorldX][plr[pnum].WorldY] = 0;
@@ -3023,7 +3033,10 @@ void CheckNewPath(int pnum)
 {
 	int i, x, y, d;
 	int xvel3, xvel, yvel;
-
+	//++CR
+	char moveDuration;
+	//--CR
+	
 	if ((DWORD)pnum >= MAX_PLRS) {
 		app_fatal("CheckNewPath: illegal player %d", pnum);
 	}
@@ -3064,6 +3077,8 @@ void CheckNewPath(int pnum)
 				}
 			}
 
+			//++CR
+			/*
 			if (currlevel != 0) {
 				xvel3 = PWVel[plr[pnum]._pClass][0];
 				xvel = PWVel[plr[pnum]._pClass][1];
@@ -3073,6 +3088,14 @@ void CheckNewPath(int pnum)
 				xvel = 1024;
 				yvel = 512;
 			}
+			*/
+			
+			moveDuration = plr[pnum]._pMoveDuration;
+			if (currlevel == 0 && moveDuration > 8) { moveDuration = 8 ; }
+			xvel3 = PWVel[plr[pnum]._pClass][0] * 8 / moveDuration;
+			xvel = PWVel[plr[pnum]._pClass][1] * 8 / moveDuration;
+			yvel = PWVel[plr[pnum]._pClass][2] * 8 / moveDuration;
+			//--CR
 
 			switch (plr[pnum].walkpath[0]) {
 			case WALK_N:

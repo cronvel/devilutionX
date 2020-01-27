@@ -437,7 +437,16 @@ void LoadPlayer(int i)
 	CopyChar(tbuff, &pPlayer->pLvlLoad);
 	CopyChar(tbuff, &pPlayer->pBattleNet);
 	CopyChar(tbuff, &pPlayer->pManaShield);
-	CopyBytes(tbuff, 3, &pPlayer->bReserved);
+	//++CR
+	//CopyBytes(tbuff, 3, &pPlayer->bReserved);
+	CopyBytes(tbuff, 1, &pPlayer->bReserved);
+	CopyBytes(tbuff, 1, &pPlayer->_pMoveDuration);
+	if ( pPlayer->_pMoveDuration <= 0 ) { pPlayer->_pMoveDuration = 8 ; }
+	// TMP:
+	pPlayer->_pMoveDuration = 8 ;
+	CopyBytes(tbuff, 1, &pPlayer->_pBaseMoveDuration);
+	if ( pPlayer->_pBaseMoveDuration <= 0 ) { pPlayer->_pBaseMoveDuration = 8 ; }
+	//--CR
 	CopyShorts(tbuff, 8, &pPlayer->wReserved);
 
 	CopyInt(tbuff, &pPlayer->pDiabloKillLevel);
@@ -1178,7 +1187,12 @@ void SavePlayer(int i)
 	CopyChar(&pPlayer->pLvlLoad, tbuff);
 	CopyChar(&pPlayer->pBattleNet, tbuff);
 	CopyChar(&pPlayer->pManaShield, tbuff);
-	CopyBytes(&pPlayer->bReserved, 3, tbuff);
+	//++CR
+	//CopyBytes(&pPlayer->bReserved, 3, tbuff);
+	CopyBytes(&pPlayer->bReserved, 1, tbuff);
+	CopyBytes(&pPlayer->_pMoveDuration, 1, tbuff);
+	CopyBytes(&pPlayer->_pBaseMoveDuration, 1, tbuff);
+	//--CR
 	CopyShorts(&pPlayer->wReserved, 8, tbuff);
 
 	CopyInt(&pPlayer->pDiabloKillLevel, tbuff);
