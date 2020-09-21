@@ -1,5 +1,5 @@
-#include "devilution.h"
-#include "miniwin/ddraw.h"
+#include "all.h"
+#include "display.h"
 
 #include "DiabloUI/button.h"
 #include "DiabloUI/diabloui.h"
@@ -24,13 +24,12 @@ void DialogActionCancel()
 	endMenu = true;
 }
 
-// TODO use PROGRESS_DIALOG for rendering the progressbar or delete it
-UiItem PROGRESS_DIALOG[] = {
-	UiImage(&dialogArt, { 180, 168, 280, 144 }),
-	UiText(dialogText, { 180, 177, 280, 43 }, UIS_CENTER),
-	UiImage(&progressArt, { 205, 220, 228, 38 }),
-	MakeSmlButton("Cancel", &DialogActionCancel, 330, 265),
-};
+//// TODO use PROGRESS_DIALOG for rendering the progressbar or delete it
+//UiItem PROGRESS_DIALOG[] = {
+//	UiImage(&dialogArt, { PANEL_LEFT + 180, 168, 280, 144 }),
+//	UiText(dialogText, { PANEL_LEFT + 180, 177, 280, 43 }, UIS_CENTER),
+//	UiImage(&progressArt, { PANEL_LEFT + 205, 220, 228, 38 }),
+//};
 
 void progress_Load(char *msg)
 {
@@ -66,6 +65,7 @@ void progress_Free()
 
 void progress_Render(BYTE progress)
 {
+	SDL_FillRect(GetOutputSurface(), NULL, 0x000000);
 	DrawArt(0, 0, &ArtBackground);
 
 	int x = GetCenterOffset(280);
@@ -80,24 +80,22 @@ void progress_Render(BYTE progress)
 
 	if (msgSurface) {
 		SDL_Rect dsc_rect = {
-			static_cast<decltype(SDL_Rect().x)>(SCREEN_X + x + 50),
-			static_cast<decltype(SDL_Rect().y)>(SCREEN_Y + y + 8),
-			SCREEN_WIDTH, SCREEN_HEIGHT
+			static_cast<Sint16>(x + 50),
+			static_cast<Sint16>(y + 8),
+			msgSurface->w,
+			msgSurface->h
 		};
-		if (SDL_BlitSurface(msgSurface, NULL, pal_surface, &dsc_rect) <= -1) {
-			ErrSdl();
-		}
-		dsc_rect.x = SCREEN_X + GetCenterOffset(textWidth) - 1;
-		dsc_rect.y = SCREEN_Y + y + 99 + 4;
-		if (SDL_BlitSurface(cancleSurface, NULL, pal_surface, &dsc_rect) <= -1) {
-			ErrSdl();
-		}
+		Blit(msgSurface, NULL, &dsc_rect);
+		dsc_rect.x = GetCenterOffset(textWidth) - 1;
+		dsc_rect.y = y + 99 + 4;
+		Blit(cancleSurface, NULL, &dsc_rect);
 	}
 }
 
-BOOL UiProgressDialog(HWND window, char *msg, int enable, int (*fnfunc)(), int rate)
+BOOL UiProgressDialog(char *msg, int enable, int (*fnfunc)(), int rate)
 {
 	progress_Load(msg);
+	SetFadeLevel(256);
 
 	endMenu = false;
 	int progress = 0;
@@ -107,7 +105,7 @@ BOOL UiProgressDialog(HWND window, char *msg, int enable, int (*fnfunc)(), int r
 		progress = fnfunc();
 		progress_Render(progress);
 		DrawMouse();
-		SetFadeLevel(256);
+		RenderPresent();
 
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
@@ -130,7 +128,6 @@ BOOL UiProgressDialog(HWND window, char *msg, int enable, int (*fnfunc)(), int r
 			UiHandleEvents(&event);
 		}
 	}
-	BlackPalette();
 	progress_Free();
 
 	return progress == 100;

@@ -2,14 +2,15 @@
 #include <deque>
 #include <SDL.h>
 
-#include "devilution.h"
-#include "miniwin/ddraw.h"
+#include "all.h"
+#include "display.h"
 #include "stubs.h"
 #include "controls/controller_motion.h"
 #include "controls/game_controls.h"
 #include "controls/plrctrls.h"
+#include "controls/remap_keyboard.h"
 #include "controls/touch.h"
-#include "miniwin/ddraw.h"
+#include "display.h"
 #include "controls/controller.h"
 
 #ifdef __SWITCH__
@@ -36,7 +37,7 @@ void SetCursorPos(int X, int Y)
 	mouseWarpingY = Y;
 	mouseWarping = true;
 	LogicalToOutput(&X, &Y);
-	SDL_WarpMouseInWindow(window, X, Y);
+	SDL_WarpMouseInWindow(ghMainWnd, X, Y);
 }
 
 // Moves the mouse to the first attribute "+" button.
@@ -73,7 +74,7 @@ void FocusOnCharInfo()
 	}
 	if (stat == -1)
 		return;
-	const auto &rect = ChrBtnsRect[stat];
+	const RECT32 &rect = ChrBtnsRect[stat];
 	SetCursorPos(rect.x + (rect.w / 2), rect.y + (rect.h / 2));
 }
 
@@ -82,6 +83,7 @@ static int translate_sdl_key(SDL_Keysym key)
 	// ref: https://wiki.libsdl.org/SDL_Keycode
 	// ref: https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
 	SDL_Keycode sym = key.sym;
+	remap_keyboard_key(&sym);
 	switch (sym) {
 	case SDLK_BACKSPACE:
 		return DVL_VK_BACK;
@@ -256,7 +258,7 @@ WPARAM keystate_for_mouse(WPARAM ret)
 	return ret;
 }
 
-WINBOOL false_avail(const char *name, int value)
+bool false_avail(const char *name, int value)
 {
 	SDL_Log("Unhandled SDL event: %s %d", name, value);
 	return true;
@@ -264,10 +266,10 @@ WINBOOL false_avail(const char *name, int value)
 
 void StoreSpellCoords()
 {
-	constexpr int START_X = 20;
-	constexpr int END_X = 636;
-	constexpr int END_Y = 495;
-	constexpr int BOX_SIZE = 56;
+	const int START_X = 20;
+	const int END_X = 636;
+	const int END_Y = 495;
+	const int BOX_SIZE = 56;
 	speedspellcount = 0;
 	int xo = END_X, yo = END_Y;
 	for (int i = 0; i < 4; i++) {
@@ -342,7 +344,7 @@ bool BlurInventory()
 	return true;
 }
 
-WINBOOL PeekMessageA(LPMSG lpMsg)
+bool PeekMessage(LPMSG lpMsg)
 {
 #ifdef __SWITCH__
 	HandleDocking();
@@ -392,36 +394,36 @@ WINBOOL PeekMessageA(LPMSG lpMsg)
 
 	GameAction action;
 	if (GetGameAction(e, &action)) {
-		if (action.type != GameActionType::NONE) {
+		if (action.type != GameActionType_NONE) {
 			sgbControllerActive = true;
 
 			if (movie_playing) {
 				lpMsg->message = DVL_WM_KEYDOWN;
-				if (action.type == GameActionType::SEND_KEY)
+				if (action.type == GameActionType_SEND_KEY)
 					lpMsg->wParam = action.send_key.vk_code;
 				return true;
 			}
 		}
 
 		switch (action.type) {
-		case GameActionType::NONE:
+		case GameActionType_NONE:
 			break;
-		case GameActionType::USE_HEALTH_POTION:
+		case GameActionType_USE_HEALTH_POTION:
 			UseBeltItem(BLT_HEALING);
 			break;
-		case GameActionType::USE_MANA_POTION:
+		case GameActionType_USE_MANA_POTION:
 			UseBeltItem(BLT_MANA);
 			break;
-		case GameActionType::PRIMARY_ACTION:
+		case GameActionType_PRIMARY_ACTION:
 			PerformPrimaryAction();
 			break;
-		case GameActionType::SECONDARY_ACTION:
+		case GameActionType_SECONDARY_ACTION:
 			PerformSecondaryAction();
 			break;
-		case GameActionType::CAST_SPELL:
+		case GameActionType_CAST_SPELL:
 			PerformSpellAction();
 			break;
-		case GameActionType::TOGGLE_QUICK_SPELL_MENU:
+		case GameActionType_TOGGLE_QUICK_SPELL_MENU:
 			if (!invflag || BlurInventory()) {
 				if (!spselflag)
 					DoSpeedBook();
@@ -433,7 +435,7 @@ WINBOOL PeekMessageA(LPMSG lpMsg)
 				StoreSpellCoords();
 			}
 			break;
-		case GameActionType::TOGGLE_CHARACTER_INFO:
+		case GameActionType_TOGGLE_CHARACTER_INFO:
 			chrflag = !chrflag;
 			if (chrflag) {
 				questlog = false;
@@ -443,7 +445,7 @@ WINBOOL PeekMessageA(LPMSG lpMsg)
 				FocusOnCharInfo();
 			}
 			break;
-		case GameActionType::TOGGLE_QUEST_LOG:
+		case GameActionType_TOGGLE_QUEST_LOG:
 			if (!questlog) {
 				StartQuestlog();
 				chrflag = false;
@@ -452,7 +454,7 @@ WINBOOL PeekMessageA(LPMSG lpMsg)
 				questlog = false;
 			}
 			break;
-		case GameActionType::TOGGLE_INVENTORY:
+		case GameActionType_TOGGLE_INVENTORY:
 			if (invflag) {
 				BlurInventory();
 			} else {
@@ -464,18 +466,18 @@ WINBOOL PeekMessageA(LPMSG lpMsg)
 				FocusOnInventory();
 			}
 			break;
-		case GameActionType::TOGGLE_SPELL_BOOK:
+		case GameActionType_TOGGLE_SPELL_BOOK:
 			if (BlurInventory()) {
 				invflag = false;
 				spselflag = false;
 				sbookflag = !sbookflag;
 			}
 			break;
-		case GameActionType::SEND_KEY:
+		case GameActionType_SEND_KEY:
 			lpMsg->message = action.send_key.up ? DVL_WM_KEYUP : DVL_WM_KEYDOWN;
 			lpMsg->wParam = action.send_key.vk_code;
 			return true;
-		case GameActionType::SEND_MOUSE_CLICK:
+		case GameActionType_SEND_MOUSE_CLICK:
 			sgbControllerActive = false;
 			switch (action.send_mouse_click.button) {
 			case GameActionSendMouseClick::LEFT:
@@ -599,7 +601,6 @@ WINBOOL PeekMessageA(LPMSG lpMsg)
 #endif
 			break;
 		case SDL_WINDOWEVENT_ENTER:
-			lpMsg->message = DVL_WM_MOUSEHOVER;
 			// Bug in SDL, SDL_WarpMouseInWindow doesn't emit SDL_MOUSEMOTION
 			// and SDL_GetMouseState gives previous location if mouse was
 			// outside window (observed on Ubuntu 19.04)
@@ -624,7 +625,7 @@ WINBOOL PeekMessageA(LPMSG lpMsg)
 	return true;
 }
 
-WINBOOL TranslateMessage(const MSG *lpMsg)
+bool TranslateMessage(const MSG *lpMsg)
 {
 	if (lpMsg->message == DVL_WM_KEYDOWN) {
 		int key = lpMsg->wParam;
@@ -642,7 +643,38 @@ WINBOOL TranslateMessage(const MSG *lpMsg)
 			if (!upper && is_alpha) {
 				key = tolower(key);
 			} else if (shift && is_numeric) {
-				key = key == '0' ? ')' : key - 0x10;
+				switch (key) {
+				case '1':
+					key = '!';
+					break;
+				case '2':
+					key = '@';
+					break;
+				case '3':
+					key = '#';
+					break;
+				case '4':
+					key = '$';
+					break;
+				case '5':
+					key = '%';
+					break;
+				case '6':
+					key = '^';
+					break;
+				case '7':
+					key = '&';
+					break;
+				case '8':
+					key = '*';
+					break;
+				case '9':
+					key = '(';
+					break;
+				case '0':
+					key = ')';
+					break;
+				}
 			} else if (is_oem) {
 				// XXX: This probably only supports US keyboard layout
 				switch (key) {
@@ -667,7 +699,6 @@ WINBOOL TranslateMessage(const MSG *lpMsg)
 				case DVL_VK_OEM_7:
 					key = shift ? '"' : '\'';
 					break;
-
 				case DVL_VK_OEM_MINUS:
 					key = shift ? '_' : '-';
 					break;
@@ -688,12 +719,12 @@ WINBOOL TranslateMessage(const MSG *lpMsg)
 
 #ifdef _DEBUG
 			if (key >= 32) {
-				DUMMY_PRINT("char: %c", key);
+				SDL_Log("char: %c", key);
 			}
 #endif
 
 			// XXX: This does not add extended info to lParam
-			PostMessageA(DVL_WM_CHAR, key, 0);
+			PostMessage(DVL_WM_CHAR, key, 0);
 		}
 	}
 
@@ -713,7 +744,7 @@ SHORT GetAsyncKeyState(int vKey)
 	case DVL_VK_SHIFT:
 		return state[SDLC_KEYSTATE_LEFTSHIFT] || state[SDLC_KEYSTATE_RIGHTSHIFT] ? 0x8000 : 0;
 	case DVL_VK_MENU:
-		return state[SDLC_KEYSTATE_MENU] ? 0x8000 : 0;
+		return state[SDLC_KEYSTATE_LALT] || state[SDLC_KEYSTATE_RALT] ? 0x8000 : 0;
 	case DVL_VK_LEFT:
 		return state[SDLC_KEYSTATE_LEFT] ? 0x8000 : 0;
 	case DVL_VK_UP:
@@ -727,14 +758,14 @@ SHORT GetAsyncKeyState(int vKey)
 	}
 }
 
-LRESULT DispatchMessageA(const MSG *lpMsg)
+LRESULT DispatchMessage(const MSG *lpMsg)
 {
 	assert(CurrentProc);
 
 	return CurrentProc(NULL, lpMsg->message, lpMsg->wParam, lpMsg->lParam);
 }
 
-WINBOOL PostMessageA(UINT Msg, WPARAM wParam, LPARAM lParam)
+bool PostMessage(UINT Msg, WPARAM wParam, LPARAM lParam)
 {
 	MSG msg;
 	msg.message = Msg;

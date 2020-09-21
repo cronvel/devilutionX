@@ -1,4 +1,9 @@
-#include "diablo.h"
+/**
+ * @file loadsave.cpp
+ *
+ * Implementation of save game functionality.
+ */
+#include "all.h"
 
 DEVILUTION_BEGIN_NAMESPACE
 
@@ -40,6 +45,10 @@ void LoadGame(BOOL firstflag)
 	}
 
 	LoadPlayer(myplr);
+
+	gnDifficulty = plr[myplr].pDifficulty;
+	if (gnDifficulty < DIFF_NORMAL || gnDifficulty > DIFF_HELL)
+		gnDifficulty = DIFF_NORMAL;
 
 	for (i = 0; i < MAXQUESTS; i++)
 		LoadQuest(i);
@@ -221,32 +230,57 @@ void CopyBytes(const void *src, const int n, void *dst)
 
 void CopyChar(const void *src, void *dst)
 {
-	CopyBytes(src, 1, dst);
+	*(char *)dst = *(char *)src;
+	tbuff += 1;
 }
 
 void CopyShort(const void *src, void *dst)
 {
-	CopyBytes(src, 2, dst);
+	unsigned short buf;
+	memcpy(&buf, src, 2);
+	tbuff += 2;
+	buf = SwapLE16(buf);
+	memcpy(dst, &buf, 2);
 }
 
 void CopyShorts(const void *src, const int n, void *dst)
 {
-	CopyBytes(src, 2 * n, dst);
+	const unsigned short *s = reinterpret_cast<const unsigned short *>(src);
+	unsigned short *d = reinterpret_cast<unsigned short *>(dst);
+	for (int i = 0; i < n; i++) {
+		CopyShort(s, d);
+		++d;
+		++s;
+	}
 }
 
 void CopyInt(const void *src, void *dst)
 {
-	CopyBytes(src, 4, dst);
+	unsigned int buf;
+	memcpy(&buf, src, 4);
+	tbuff += 4;
+	buf = SwapLE32(buf);
+	memcpy(dst, &buf, 4);
 }
 
 void CopyInts(const void *src, const int n, void *dst)
 {
-	CopyBytes(src, 4 * n, dst);
+	const unsigned int *s = reinterpret_cast<const unsigned int *>(src);
+	const unsigned int *d = reinterpret_cast<unsigned int *>(dst);
+	for (int i = 0; i < n; i++) {
+		CopyInt(s, (void*)d);
+		++d;
+		++s;
+	}
 }
 
 void CopyInt64(const void *src, void *dst)
 {
-	CopyBytes(src, 8, dst);
+	unsigned long long buf;
+	memcpy(&buf, src, 8);
+	tbuff += 8;
+	buf = SDL_SwapLE64(buf);
+	memcpy(dst, &buf, 8);
 }
 
 //++CR
@@ -260,9 +294,10 @@ void LoadCRExtensions()
 void LoadPlayer(int i)
 {
 	PlayerStruct *pPlayer = &plr[i];
+	char tempChar;
 
 	CopyInt(tbuff, &pPlayer->_pmode);
-	CopyBytes(tbuff, 25, pPlayer->walkpath);
+	CopyBytes(tbuff, MAX_PATH_LENGTH, pPlayer->walkpath);
 	CopyBytes(tbuff, 1, &pPlayer->plractive);
 	tbuff += 2; // Alignment
 	CopyInt(tbuff, &pPlayer->destAction);
@@ -271,10 +306,10 @@ void LoadPlayer(int i)
 	CopyInt(tbuff, &pPlayer->destParam3);
 	CopyInt(tbuff, &pPlayer->destParam4);
 	CopyInt(tbuff, &pPlayer->plrlevel);
-	CopyInt(tbuff, &pPlayer->WorldX);
-	CopyInt(tbuff, &pPlayer->WorldY);
 	CopyInt(tbuff, &pPlayer->_px);
 	CopyInt(tbuff, &pPlayer->_py);
+	CopyInt(tbuff, &pPlayer->_pfutx);
+	CopyInt(tbuff, &pPlayer->_pfuty);
 	CopyInt(tbuff, &pPlayer->_ptargx);
 	CopyInt(tbuff, &pPlayer->_ptargy);
 	CopyInt(tbuff, &pPlayer->_pownerx);
@@ -295,7 +330,7 @@ void LoadPlayer(int i)
 	CopyInt(tbuff, &pPlayer->_pAnimFrame);
 	CopyInt(tbuff, &pPlayer->_pAnimWidth);
 	CopyInt(tbuff, &pPlayer->_pAnimWidth2);
-	CopyInt(tbuff, &pPlayer->_peflag);
+	tbuff += 4; // Skip _peflag
 	CopyInt(tbuff, &pPlayer->_plid);
 	CopyInt(tbuff, &pPlayer->_pvid);
 
@@ -341,6 +376,9 @@ void LoadPlayer(int i)
 	CopyInt(tbuff, &pPlayer->_pStatPts);
 	CopyInt(tbuff, &pPlayer->_pDamageMod);
 	CopyInt(tbuff, &pPlayer->_pBaseToBlk);
+	if (pPlayer->_pBaseToBlk == 0) {
+		pPlayer->_pBaseToBlk = ToBlkTbl[pPlayer->_pClass];
+	}
 	CopyInt(tbuff, &pPlayer->_pHPBase);
 	CopyInt(tbuff, &pPlayer->_pMaxHPBase);
 	CopyInt(tbuff, &pPlayer->_pHitPoints);
@@ -424,7 +462,9 @@ void LoadPlayer(int i)
 	CopyInt(tbuff, &pPlayer->_pIGetHit);
 	CopyChar(tbuff, &pPlayer->_pISplLvlAdd);
 	CopyChar(tbuff, &pPlayer->_pISplCost);
-	tbuff += 2; // Alignment
+	CopyChar(tbuff, &tempChar);
+	pPlayer->pDifficulty = tempChar & 3; // Use 2 alignment bits for difficulty
+	tbuff += 1; // Alignment
 	CopyInt(tbuff, &pPlayer->_pISplDur);
 	CopyInt(tbuff, &pPlayer->_pIEnAc);
 	CopyInt(tbuff, &pPlayer->_pIFMinDam);
@@ -499,7 +539,7 @@ void LoadMonster(int i)
 	CopyInt(tbuff, &pMonster->_mAnimCnt);
 	CopyInt(tbuff, &pMonster->_mAnimLen);
 	CopyInt(tbuff, &pMonster->_mAnimFrame);
-	CopyInt(tbuff, &pMonster->_meflag);
+	tbuff += 4; // Skip _meflag
 	CopyInt(tbuff, &pMonster->_mDelFlag);
 	CopyInt(tbuff, &pMonster->_mVar1);
 	CopyInt(tbuff, &pMonster->_mVar2);
@@ -534,10 +574,10 @@ void LoadMonster(int i)
 	tbuff += 1; // Alignment
 	CopyShort(tbuff, &pMonster->mExp);
 
-	CopyChar(tbuff, &pMonster->mHit);
+	tbuff += 1; // Skip mHit as it's already initialized
 	CopyChar(tbuff, &pMonster->mMinDamage);
 	CopyChar(tbuff, &pMonster->mMaxDamage);
-	CopyChar(tbuff, &pMonster->mHit2);
+	tbuff += 1; // Skip mHit2 as it's already initialized
 	CopyChar(tbuff, &pMonster->mMinDamage2);
 	CopyChar(tbuff, &pMonster->mMaxDamage2);
 	CopyChar(tbuff, &pMonster->mArmorClass);
@@ -847,6 +887,7 @@ void SaveGame()
 		WSave(gnLevelTypeTbl[i]);
 	}
 
+	plr[myplr].pDifficulty = gnDifficulty;
 	SavePlayer(myplr);
 
 	for (i = 0; i < MAXQUESTS; i++)
@@ -1009,9 +1050,10 @@ void SaveCRExtensions()
 void SavePlayer(int i)
 {
 	PlayerStruct *pPlayer = &plr[i];
+	char tempChar;
 
 	CopyInt(&pPlayer->_pmode, tbuff);
-	CopyBytes(&pPlayer->walkpath, 25, tbuff);
+	CopyBytes(&pPlayer->walkpath, MAX_PATH_LENGTH, tbuff);
 	CopyBytes(&pPlayer->plractive, 1, tbuff);
 	tbuff += 2; // Alignment
 	CopyInt(&pPlayer->destAction, tbuff);
@@ -1020,10 +1062,10 @@ void SavePlayer(int i)
 	CopyInt(&pPlayer->destParam3, tbuff);
 	CopyInt(&pPlayer->destParam4, tbuff);
 	CopyInt(&pPlayer->plrlevel, tbuff);
-	CopyInt(&pPlayer->WorldX, tbuff);
-	CopyInt(&pPlayer->WorldY, tbuff);
 	CopyInt(&pPlayer->_px, tbuff);
 	CopyInt(&pPlayer->_py, tbuff);
+	CopyInt(&pPlayer->_pfutx, tbuff);
+	CopyInt(&pPlayer->_pfuty, tbuff);
 	CopyInt(&pPlayer->_ptargx, tbuff);
 	CopyInt(&pPlayer->_ptargy, tbuff);
 	CopyInt(&pPlayer->_pownerx, tbuff);
@@ -1044,7 +1086,7 @@ void SavePlayer(int i)
 	CopyInt(&pPlayer->_pAnimFrame, tbuff);
 	CopyInt(&pPlayer->_pAnimWidth, tbuff);
 	CopyInt(&pPlayer->_pAnimWidth2, tbuff);
-	CopyInt(&pPlayer->_peflag, tbuff);
+	tbuff += 4; // Skip _peflag
 	CopyInt(&pPlayer->_plid, tbuff);
 	CopyInt(&pPlayer->_pvid, tbuff);
 
@@ -1123,7 +1165,7 @@ void SavePlayer(int i)
 	CopyInt(&pPlayer->_pVar8, tbuff);
 	CopyBytes(&pPlayer->_pLvlVisited, NUMLEVELS, tbuff);
 	CopyBytes(&pPlayer->_pSLvlVisited, NUMLEVELS, tbuff); // only 10 used
-	tbuff += 2; // Alignment
+	tbuff += 2;                                           // Alignment
 
 	CopyInt(&pPlayer->_pGFXLoad, tbuff);
 	tbuff += 4 * 8; // Skip pointers _pNAnim
@@ -1174,7 +1216,9 @@ void SavePlayer(int i)
 
 	CopyChar(&pPlayer->_pISplLvlAdd, tbuff);
 	CopyChar(&pPlayer->_pISplCost, tbuff);
-	tbuff += 2; // Alignment
+	tempChar = pPlayer->pDifficulty & 3; // Use 2 alignment bits for difficulty
+	CopyChar(&tempChar, tbuff);
+	tbuff += 1; // Alignment
 	CopyInt(&pPlayer->_pISplDur, tbuff);
 	CopyInt(&pPlayer->_pIEnAc, tbuff);
 	CopyInt(&pPlayer->_pIFMinDam, tbuff);
@@ -1213,6 +1257,7 @@ void SavePlayer(int i)
 void SaveMonster(int i)
 {
 	MonsterStruct *pMonster = &monster[i];
+	char tempChar;
 
 	CopyInt(&pMonster->_mMTidx, tbuff);
 	CopyInt(&pMonster->_mmode, tbuff);
@@ -1245,7 +1290,7 @@ void SaveMonster(int i)
 	CopyInt(&pMonster->_mAnimCnt, tbuff);
 	CopyInt(&pMonster->_mAnimLen, tbuff);
 	CopyInt(&pMonster->_mAnimFrame, tbuff);
-	CopyInt(&pMonster->_meflag, tbuff);
+	tbuff += 4; // Skip _meflag
 	CopyInt(&pMonster->_mDelFlag, tbuff);
 	CopyInt(&pMonster->_mVar1, tbuff);
 	CopyInt(&pMonster->_mVar2, tbuff);
@@ -1280,10 +1325,14 @@ void SaveMonster(int i)
 	tbuff += 1; // Alignment
 	CopyShort(&pMonster->mExp, tbuff);
 
-	CopyChar(&pMonster->mHit, tbuff);
+	// Wtite mHit for backwards compatabiliyt
+	tempChar = pMonster->mHit < SCHAR_MAX ? pMonster->mHit : SCHAR_MAX;
+	CopyChar(&tempChar, tbuff);
 	CopyChar(&pMonster->mMinDamage, tbuff);
 	CopyChar(&pMonster->mMaxDamage, tbuff);
-	CopyChar(&pMonster->mHit2, tbuff);
+	// Wtite mHit2 for backwards compatabiliyt
+	tempChar = pMonster->mHit2 < SCHAR_MAX ? pMonster->mHit2 : SCHAR_MAX;
+	CopyChar(&tempChar, tbuff);
 	CopyChar(&pMonster->mMinDamage2, tbuff);
 	CopyChar(&pMonster->mMaxDamage2, tbuff);
 	CopyChar(&pMonster->mArmorClass, tbuff);
@@ -1564,7 +1613,7 @@ void SaveLevel()
 	int dwLen;
 	BYTE *SaveBuff;
 
-	if (!currlevel)
+	if (currlevel == 0)
 		glSeedTbl[0] = GetRndSeed();
 
 	dwLen = codec_get_encoded_len(FILEBUFF);
@@ -1737,7 +1786,7 @@ void LoadLevel()
 
 	for (i = 0; i < MAX_PLRS; i++) {
 		if (plr[i].plractive && currlevel == plr[i].plrlevel)
-			LightList[plr[i]._plid]._lunflag = 1;
+			LightList[plr[i]._plid]._lunflag = TRUE;
 	}
 
 	mem_free_dbg(LoadBuff);

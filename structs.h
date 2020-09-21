@@ -1,3 +1,11 @@
+/**
+ * @file structs.h
+ *
+ * Various global structures.
+ */
+
+DEVILUTION_BEGIN_NAMESPACE
+
 //////////////////////////////////////////////////
 // control
 //////////////////////////////////////////////////
@@ -102,7 +110,7 @@ typedef struct ItemStruct {
 	int _iAnimFrame;
 	int _iAnimWidth;
 	int _iAnimWidth2; // width 2?
-	BOOL _iDelFlag; // set when item is flagged for deletion, deprecated in 1.02
+	BOOL _iDelFlag;   // set when item is flagged for deletion, deprecated in 1.02
 	char _iSelFlag;
 	BOOL _iPostDraw;
 	BOOL _iIdentified;
@@ -171,7 +179,7 @@ typedef struct ItemStruct {
 
 typedef struct PlayerStruct {
 	int _pmode;
-	char walkpath[25];
+	char walkpath[MAX_PATH_LENGTH];
 	BOOLEAN plractive;
 	int destAction;
 	int destParam1;
@@ -179,10 +187,10 @@ typedef struct PlayerStruct {
 	int destParam3;
 	int destParam4;
 	int plrlevel;
-	int WorldX;
-	int WorldY;
 	int _px;
 	int _py;
+	int _pfutx;
+	int _pfuty;
 	int _ptargx;
 	int _ptargy;
 	int _pownerx;
@@ -342,6 +350,7 @@ typedef struct PlayerStruct {
 	//--CR
 	short wReserved[8];
 	DWORD pDiabloKillLevel;
+	int pDifficulty;
 	int dwReserved[7];
 	unsigned char *_pNData;
 	unsigned char *_pWData;
@@ -375,8 +384,8 @@ typedef struct TextDataStruct {
 
 typedef struct MissileData {
 	unsigned char mName;
-	void(* mAddProc)(int, int, int, int, int, int, char, int, int);
-	void(* mProc)(int);
+	void (*mAddProc)(int, int, int, int, int, int, char, int, int);
+	void (*mProc)(int);
 	BOOL mDraw;
 	unsigned char mType;
 	unsigned char mResist;
@@ -456,17 +465,15 @@ typedef struct MissileStruct {
 
 typedef struct TSnd {
 	char *sound_path;
-	LPDIRECTSOUNDBUFFER DSB;
+	SoundSample *DSB;
 	int start_tc;
 } TSnd;
 
-#pragma pack(push, 1)
 typedef struct TSFX {
 	unsigned char bFlags;
 	char *pszName;
 	TSnd *pSnd;
 } TSFX;
-#pragma pack(pop)
 
 //////////////////////////////////////////////////
 // monster
@@ -499,11 +506,11 @@ typedef struct MonsterData {
 	char mAi;
 	int mFlags;
 	unsigned char mInt;
-	unsigned char mHit; // BUGFIX: Some monsters overflow this value on high difficulty
+	unsigned short mHit; // BUGFIX: Some monsters overflow this value on high difficultys (fixed)
 	unsigned char mAFNum;
 	unsigned char mMinDamage;
 	unsigned char mMaxDamage;
-	unsigned char mHit2; // BUGFIX: Some monsters overflow this value on high difficulty
+	unsigned short mHit2; // BUGFIX: Some monsters overflow this value on high difficulty (fixed)
 	unsigned char mAFNum2;
 	unsigned char mMinDamage2;
 	unsigned char mMaxDamage2;
@@ -593,10 +600,10 @@ typedef struct MonsterStruct { // note: missing field _mAFNum
 	char mWhoHit;
 	char mLevel;
 	unsigned short mExp;
-	unsigned char mHit;
+	unsigned short mHit;
 	unsigned char mMinDamage;
 	unsigned char mMaxDamage;
-	unsigned char mHit2;
+	unsigned short mHit2;
 	unsigned char mMinDamage2;
 	unsigned char mMaxDamage2;
 	unsigned char mArmorClass;
@@ -817,7 +824,7 @@ typedef struct TCmdChItem {
 	WORD wIndx;
 	WORD wCI;
 	int dwSeed;
-	BYTE bId;
+	BOOLEAN bId;
 } TCmdChItem;
 
 typedef struct TCmdDelItem {
@@ -1002,7 +1009,7 @@ typedef struct QuestData {
 typedef struct TMenuItem {
 	DWORD dwFlags;
 	char *pszStr;
-	void(* fnMenu)(BOOL); /* fix, should have one arg */
+	void (*fnMenu)(BOOL); /* fix, should have one arg */
 } TMenuItem;
 
 // TPDEF PTR FCN VOID TMenuUpdateFcn
@@ -1065,7 +1072,7 @@ typedef struct TownerStruct {
 	int _teflag;
 	int _tbtcnt;
 	int _tSelFlag;
-	int _tMsgSaid;
+	BOOL _tMsgSaid;
 	TNQ qsts[MAXQUESTS];
 	int _tSeed;
 	int _tVar1;
@@ -1322,22 +1329,22 @@ typedef struct _SNETUIDATA {
 	int size;
 	int uiflags;
 	HWND parentwindow;
-	void(* artcallback)();
-	void(* authcallback)();
-	void(* createcallback)();
-	void(* drawdesccallback)();
-	void(* selectedcallback)();
-	void(* messageboxcallback)();
-	void(* soundcallback)();
-	void(* statuscallback)();
-	void(* getdatacallback)();
-	void(* categorycallback)();
-	void(* categorylistcallback)();
-	void(* newaccountcallback)();
-	void(* profilecallback)();
-	int profilefields;
-	void(* profilebitmapcallback)();
-	int(*selectnamecallback)(
+	void (*artcallback)();
+	void (*authcallback)();
+	void (*createcallback)();
+	void (*drawdesccallback)();
+	void (*selectedcallback)();
+	void (*messageboxcallback)();
+	void (*soundcallback)();
+	void (*statuscallback)();
+	void (*getdatacallback)();
+	void (*categorycallback)();
+	void (*categorylistcallback)();
+	void (*newaccountcallback)();
+	void (*profilecallback)();
+	const char **profilefields;
+	void (*profilebitmapcallback)();
+	int (*selectnamecallback)(
 	    const struct _SNETPROGRAMDATA *,
 	    const struct _SNETPLAYERDATA *,
 	    const struct _SNETUIDATA *,
@@ -1346,8 +1353,8 @@ typedef struct _SNETUIDATA {
 	    char *, DWORD,  /* character name will be copied here */
 	    char *, DWORD,  /* character "description" will be copied here (used to advertise games) */
 	    BOOL *          /* new character? - unsure about this */
-	    );
-	void(* changenamecallback)();
+	);
+	void (*changenamecallback)();
 } _SNETUIDATA;
 
 // TPDEF PTR FCN UCHAR SNETSPIBIND
@@ -1482,16 +1489,16 @@ typedef struct _FILEHEADER {
 } _FILEHEADER;
 
 typedef struct _HASHENTRY {
-	int hashcheck[2];
-	int lcid;
-	int block;
+	uint32_t hashcheck[2];
+	uint32_t lcid;
+	uint32_t block;
 } _HASHENTRY;
 
 typedef struct _BLOCKENTRY {
-	int offset;
-	int sizealloc;
-	int sizefile;
-	int flags;
+	uint32_t offset;
+	uint32_t sizealloc;
+	uint32_t sizefile;
+	uint32_t flags;
 } _BLOCKENTRY;
 
 // TPDEF PTR FCN UCHAR TGetNameFcn
@@ -1517,10 +1524,10 @@ typedef struct STextStruct {
 	int _sx;
 	int _syoff;
 	char _sstr[128];
-	int _sjust;
+	BOOL _sjust;
 	char _sclr;
 	int _sline;
-	int _ssel;
+	BOOL _ssel;
 	int _sval;
 } STextStruct;
 
@@ -1584,3 +1591,5 @@ typedef struct TDataInfo {
 	DWORD destOffset;
 	DWORD size;
 } TDataInfo;
+
+DEVILUTION_END_NAMESPACE

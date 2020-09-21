@@ -1,6 +1,16 @@
-//HEADER_GOES_HERE
+/**
+ * @file multi.h
+ *
+ * Interface of functions for keeping multiplaye games in sync.
+ */
 #ifndef __MULTI_H__
 #define __MULTI_H__
+
+DEVILUTION_BEGIN_NAMESPACE
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 extern BOOLEAN gbSomebodyWonGameKludge;
 extern char szPlayerDescript[128];
@@ -9,15 +19,12 @@ extern PkPlayerStruct netplr[MAX_PLRS];
 extern BOOL gbShouldValidatePackage;
 extern BYTE gbActivePlayers;
 extern BOOLEAN gbGameDestroyed;
-extern BOOLEAN gbGameUninitialized;
+extern BOOLEAN gbSelectProvider;
 extern BYTE gbMaxPlayers;
 extern char szPlayerName[128];
 extern BYTE gbDeltaSender;
 extern int player_state[MAX_PLRS];
 
-#ifdef _DEBUG
-void dumphist(const char *pszFmt, ...);
-#endif
 void multi_msg_add(BYTE *pbMsg, BYTE bLen);
 void NetSendLoPri(BYTE *pbMsg, BYTE bLen);
 void multi_copy_packet(TBuffer *pBuf, void *packet, BYTE size);
@@ -58,5 +65,11 @@ void recv_plrinfo(int pnum, TCmdPlrInfoHdr *p, BOOL recv);
 /* rdata */
 
 extern const int event_types[3];
+
+#ifdef __cplusplus
+}
+#endif
+
+DEVILUTION_END_NAMESPACE
 
 #endif /* __MULTI_H__ */

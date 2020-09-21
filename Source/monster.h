@@ -1,6 +1,16 @@
-//HEADER_GOES_HERE
+/**
+ * @file monster.h
+ *
+ * Interface of monster functionality, AI, actions, spawning, loading, etc.
+ */
 #ifndef __MONSTER_H__
 #define __MONSTER_H__
+
+DEVILUTION_BEGIN_NAMESPACE
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 extern int MissileFileFlag;
 extern int monstkills[MAXMONSTERS];
@@ -10,6 +20,7 @@ extern BOOLEAN sgbSaveSoundOn;
 extern MonsterStruct monster[MAXMONSTERS];
 extern int totalmonsters;
 extern CMonster Monsters[MAX_LVLMTYPES];
+extern BYTE GraphicTable[NUMLEVELS][MAX_LVLMTYPES];
 extern int monstimgtot;
 extern int uniquetrans;
 extern int nummtypes;
@@ -33,7 +44,7 @@ void PlaceUniques();
 void SetMapMonsters(BYTE *pMap, int startx, int starty);
 void DeleteMonster(int i);
 int AddMonster(int x, int y, int dir, int mtype, BOOL InMap);
-void NewMonsterAnim(int i, AnimStruct &anim, int md);
+void NewMonsterAnim(int i, AnimStruct *anim, int md);
 BOOL M_Ranged(int i);
 BOOL M_Talker(int i);
 void M_Enemy(int i);
@@ -92,7 +103,7 @@ BOOL M_CallWalk(int i, int md);
 BOOL M_PathWalk(int i);
 BOOL M_CallWalk2(int i, int md);
 BOOL M_DumbWalk(int i, int md);
-BOOL M_RoundWalk(int i, int md, int &dir);
+BOOL M_RoundWalk(int i, int md, int *dir);
 void MAI_Zombie(int i);
 void MAI_SkelSd(int i);
 BOOL MAI_Path(int i);
@@ -156,7 +167,7 @@ int PreSpawnSkeleton();
 void TalktoMonster(int i);
 void SpawnGolum(int i, int x, int y, int mi);
 BOOL CanTalkToMonst(int m);
-BOOL CheckMonsterHit(int m, BOOL &ret);
+BOOL CheckMonsterHit(int m, BOOL *ret);
 int encode_enemy(int m);
 void decode_enemy(int m, int enemy);
 
@@ -175,7 +186,7 @@ extern int opposite[8];
 extern int offset_x[8];
 extern int offset_y[8];
 
-/* unused */
+/** unused */
 extern int rnd5[4];
 extern int rnd10[4];
 extern int rnd20[4];
@@ -183,5 +194,11 @@ extern int rnd60[4];
 //
 
 extern void (*AiProc[])(int i);
+
+#ifdef __cplusplus
+}
+#endif
+
+DEVILUTION_END_NAMESPACE
 
 #endif /* __MONSTER_H__ */

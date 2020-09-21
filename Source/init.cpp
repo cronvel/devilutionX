@@ -1,4 +1,9 @@
-#include "diablo.h"
+/**
+ * @file init.cpp
+ *
+ * Implementation of routines for initializing the environment, disable screen saver, load MPQ.
+ */
+#include "all.h"
 
 #include "../3rdParty/Storm/Source/storm.h"
 #include "../DiabloUI/diabloui.h"
@@ -47,10 +52,10 @@ void init_create_window()
 	if (!SpawnWindow(PROJECT_NAME, SCREEN_WIDTH, SCREEN_HEIGHT))
 		app_fatal("Unable to create main window");
 	dx_init(NULL);
-	atexit(dx_cleanup);
+	was_window_init = true;
 	gbActive = true;
 	gpBufStart = &gpBuffer[BUFFER_WIDTH * SCREEN_Y];
-	gpBufEnd = &gpBuffer[BUFFER_WIDTH * (SCREEN_HEIGHT + SCREEN_Y)];
+	gpBufEnd = (BYTE *)(BUFFER_WIDTH * (SCREEN_HEIGHT + SCREEN_Y));
 	SDL_DisableScreenSaver();
 }
 
@@ -86,7 +91,6 @@ void init_archives()
 HANDLE init_test_access(char *mpq_path, char *mpq_name, char *reg_loc, int dwPriority, int fs)
 {
 	char Buffer[2][MAX_PATH];
-	char *sdlPath;
 	HANDLE archive;
 
 	GetBasePath(Buffer[0], MAX_PATH);
@@ -94,7 +98,7 @@ HANDLE init_test_access(char *mpq_path, char *mpq_name, char *reg_loc, int dwPri
 
 	for (int i = 0; i < 2; i++) {
 		snprintf(mpq_path, MAX_PATH, "%s%s", Buffer[i], mpq_name);
-#ifndef __SWITCH__
+#if !defined(__SWITCH__) && !defined(__AMIGA__)
 		if (SFileOpenArchive(mpq_path, dwPriority, MPQ_FLAG_READ_ONLY, &archive)) {
 #else
 		if (SFileOpenArchive(mpq_path, dwPriority, 0, &archive)) {
@@ -117,26 +121,17 @@ void init_get_file_info()
 LRESULT MainWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (Msg) {
-	case WM_ERASEBKGND:
+	case DVL_WM_ERASEBKGND:
 		return 0;
-	case WM_PAINT:
+	case DVL_WM_PAINT:
 		force_redraw = 255;
 		break;
-	case WM_CLOSE:
+	case DVL_WM_CLOSE:
 		return 0;
-#ifdef _DEBUG
-	case WM_SYSKEYUP:
-		if (wParam == VK_RETURN) {
-			fullscreen = !fullscreen;
-			dx_reinit();
-			return 0;
-		}
-		break;
-#endif
-	case WM_QUERYNEWPALETTE:
+	case DVL_WM_QUERYNEWPALETTE:
 		return 1;
-	case WM_QUERYENDSESSION:
-		exit(0);
+	case DVL_WM_QUERYENDSESSION:
+		diablo_quit(0);
 	}
 
 	return 0;
